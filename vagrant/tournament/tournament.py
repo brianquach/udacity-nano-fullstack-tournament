@@ -2,9 +2,7 @@
 # 
 # tournament.py -- implementation of a Swiss-system tournament
 #
-
 import psycopg2
-
 
 def connect():
     """Connect to the PostgreSQL database.  Returns a database connection."""
@@ -13,14 +11,30 @@ def connect():
 
 def deleteMatches():
     """Remove all the match records from the database."""
+    conn = connect()
+    c = conn.cursor()
+    c.execute("DELETE FROM match")
+    conn.commit()
+    conn.close()
 
 
 def deletePlayers():
     """Remove all the player records from the database."""
+    conn = connect()
+    c = conn.cursor()
+    c.execute("DELETE FROM player")
+    conn.commit()
+    conn.close()
 
 
 def countPlayers():
     """Returns the number of players currently registered."""
+    conn = connect()
+    c = conn.cursor()
+    c.execute("SELECT COUNT(id) FROM player")
+    row = c.fetchone()
+    conn.close()
+    return row[0] if row is not None else 0
 
 
 def registerPlayer(name):
@@ -32,13 +46,20 @@ def registerPlayer(name):
     Args:
       name: the player's full name (need not be unique).
     """
+    conn = connect()
+    c = conn.cursor()
+    tournamentId = currentTournamentId()
+    c.execute("INSERT INTO player (name, tournamentId) VALUES (\'{0}\', {1})"
+        .format(name, tournamentId))
+    conn.commit()
+    conn.close()
 
 
 def playerStandings():
     """Returns a list of the players and their win records, sorted by wins.
 
-    The first entry in the list should be the player in first place, or a player
-    tied for first place if there is currently a tie.
+    The first entry in the list should be the player in first place, or a 
+    player tied for first place if there is currently a tie.
 
     Returns:
       A list of tuples, each of which contains (id, name, wins, matches):
@@ -74,4 +95,27 @@ def swissPairings():
         name2: the second player's name
     """
 
+def createTournament():
+    """Creates a new tournament and returns its id."""
+    conn = connect()
+    c = conn.cursor()
+    c.execute("INSERT INTO tournament (id) VALUES (DEFAULT) RETURNING id")
+    tournamentId = c.fetchone()[0]
+    conn.commit()
+    conn.close()
+    return tournamentId
 
+def currentTournamentId():
+    """Returns the active tournament Id.
+
+    An active tournament is the most recent tournament where players are still
+    playing with no winner. If there are no tournaments then a new one will be
+    created and its id returned.
+    """
+    conn = connect()
+    c = conn.cursor()
+    c.execute("SELECT id FROM tournament ORDER BY id DESC LIMIT 1")
+    row = c.fetchone()
+    tournamentId = createTournament() if row is None else row[0]
+    conn.close()
+    return tournamentId
