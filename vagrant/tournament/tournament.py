@@ -48,13 +48,13 @@ def registerPlayer(name):
     """
     conn = connect()
     c = conn.cursor()
-    tournamentId = currentTournamentId()
-    c.execute("INSERT INTO player (name, tournamentId) VALUES (\'{0}\', {1})"
-        .format(name, tournamentId))
+    tournament_id = activeTournamentId()
+    c.execute("INSERT INTO player (name, tournamentId) VALUES (%s, %s)", (name,
+        tournament_id))
     conn.commit()
     conn.close()
 
-
+ 
 def playerStandings():
     """Returns a list of the players and their win records, sorted by wins.
 
@@ -68,6 +68,12 @@ def playerStandings():
         wins: the number of matches the player has won
         matches: the number of matches the player has played
     """
+    conn = connect()
+    c = conn.cursor()
+    c.execute("SELECT * FROM playerStanding")
+    player_standings = c.fetchall()
+    conn.close()
+    return player_standings
 
 
 def reportMatch(winner, loser):
@@ -77,8 +83,14 @@ def reportMatch(winner, loser):
       winner:  the id number of the player who won
       loser:  the id number of the player who lost
     """
- 
- 
+    conn = connect()
+    c = conn.cursor()
+    tournament_id = activeTournamentId()
+    c.execute("INSERT INTO match (tournamentId, winnerId, loserId) VALUES (%s,"
+        "%s, %s)", (tournament_id, winner, loser))
+    conn.commit()
+    conn.close()
+
 def swissPairings():
     """Returns a list of pairs of players for the next round of a match.
   
@@ -100,12 +112,20 @@ def createTournament():
     conn = connect()
     c = conn.cursor()
     c.execute("INSERT INTO tournament (id) VALUES (DEFAULT) RETURNING id")
-    tournamentId = c.fetchone()[0]
+    tournament_id = c.fetchone()[0]
     conn.commit()
     conn.close()
-    return tournamentId
+    return tournament_id
 
-def currentTournamentId():
+def deleteTournaments():
+    """Remove all tournament records from the database."""
+    conn = connect()
+    c = conn.cursor()
+    c. execute("DELETE FROM tournament")
+    conn.commit()
+    conn.close()
+
+def activeTournamentId():
     """Returns the active tournament Id.
 
     An active tournament is the most recent tournament where players are still
@@ -116,6 +136,6 @@ def currentTournamentId():
     c = conn.cursor()
     c.execute("SELECT id FROM tournament ORDER BY id DESC LIMIT 1")
     row = c.fetchone()
-    tournamentId = createTournament() if row is None else row[0]
+    tournament_id = createTournament() if row is None else row[0]
     conn.close()
-    return tournamentId
+    return tournament_id
