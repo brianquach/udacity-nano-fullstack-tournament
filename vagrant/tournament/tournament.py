@@ -106,6 +106,25 @@ def swissPairings():
         id2: the second player's unique id
         name2: the second player's name
     """
+    pairings = []
+    standings = playerStandings()
+    index = 0
+    player_count = len(standings)
+    while index < player_count:
+        player_one = standings[index]
+        index += 1
+        if (index < player_count):
+            player_two = standings[index]
+            pairings.append((
+                player_one[0],
+                player_one[1],
+                player_two[0],
+                player_two[1]
+            ))
+        else:
+            pairings.push((player_one[0], player_one[1], None, None))
+        index += 1
+    return pairings
 
 def createTournament():
     """Creates a new tournament and returns its id."""
