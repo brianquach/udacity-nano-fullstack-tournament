@@ -4,6 +4,7 @@
 #
 import psycopg2
 
+
 def connect():
     """Connect to the PostgreSQL database.  Returns a database connection."""
     return psycopg2.connect("dbname=tournament")
@@ -14,6 +15,7 @@ def deleteMatches():
     conn = connect()
     c = conn.cursor()
     c.execute("DELETE FROM match")
+    c.execute("DELETE FROM match_tie")
     conn.commit()
     conn.close()
 
@@ -45,21 +47,32 @@ def registerPlayer(name):
   
     Args:
       name: the player's full name (need not be unique).
+
+    Returns:
+      Newly registered player's Id
     """
     conn = connect()
     c = conn.cursor()
     tournament_id = activeTournamentId()
-    c.execute("INSERT INTO player (name, tournamentId) VALUES (%s, %s)", (name,
-        tournament_id))
+    c.execute("INSERT INTO player (name, tournamentId) VALUES (%s, %s) "
+        "RETURNING id", (name, tournament_id))
+    player_id = c.fetchone()[0]
     conn.commit()
     conn.close()
-
+    return player_id
  
-def playerStandings():
+
+def playerStandings(include_ties = False):
     """Returns a list of the players and their win records, sorted by wins.
 
     The first entry in the list should be the player in first place, or a 
-    player tied for first place if there is currently a tie.
+    player tied for first place if there is currently a tie. Optional parameter
+    include_ties added in for backwards compatability with original test cases
+    from the code fork.
+
+    Args:
+      include_ties: if true return the number of ties to the tuple being
+        returned.
 
     Returns:
       A list of tuples, each of which contains (id, name, wins, matches):
@@ -67,29 +80,42 @@ def playerStandings():
         name: the player's full name (as registered)
         wins: the number of matches the player has won
         matches: the number of matches the player has played
+        ties (optional): the number of matches the player has tied
     """
     conn = connect()
     c = conn.cursor()
-    c.execute("SELECT * FROM playerStanding")
+    if include_ties:
+        c.execute("SELECT * FROM playerStandingWithTies")
+    else:
+        c.execute("SELECT * FROM playerStanding")
     player_standings = c.fetchall()
     conn.close()
     return player_standings
 
 
-def reportMatch(winner, loser):
+def reportMatch(winner, loser, is_tie = False):
     """Records the outcome of a single match between two players.
 
     Args:
-      winner:  the id number of the player who won
-      loser:  the id number of the player who lost
+      winner: the id number of the player who won
+      loser: the id number of the player who lost
+      is_tie: true if the match ended in a tie, otherwise false
     """
     conn = connect()
     c = conn.cursor()
     tournament_id = activeTournamentId()
-    c.execute("INSERT INTO match (tournamentId, winnerId, loserId) VALUES (%s,"
-        "%s, %s)", (tournament_id, winner, loser))
+    if is_tie:
+        c.execute("INSERT INTO match_tie (playerOneId, playerTwoId) VALUES "
+            "(%s, %s) RETURNING id", (winner, loser))        
+        tie_id = c.fetchone()[0]
+        c.execute("INSERT INTO match (tournamentId, tieId) VALUES "
+            "(%s, %s)", (tournament_id, tie_id))
+    else:
+        c.execute("INSERT INTO match (tournamentId, winnerId, loserId) VALUES "
+            "(%s, %s, %s)", (tournament_id, winner, loser))
     conn.commit()
     conn.close()
+
 
 def swissPairings():
     """Returns a list of pairs of players for the next round of a match.
@@ -126,6 +152,7 @@ def swissPairings():
         index += 1
     return pairings
 
+
 def createTournament():
     """Creates a new tournament and returns its id."""
     conn = connect()
@@ -136,6 +163,7 @@ def createTournament():
     conn.close()
     return tournament_id
 
+
 def deleteTournaments():
     """Remove all tournament records from the database."""
     conn = connect()
@@ -143,6 +171,7 @@ def deleteTournaments():
     c. execute("DELETE FROM tournament")
     conn.commit()
     conn.close()
+
 
 def activeTournamentId():
     """Returns the active tournament Id.
