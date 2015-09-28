@@ -148,6 +148,7 @@ def testDeleteTournaments():
 
 
 def testTournamentFunctions():
+    deleteTournaments()
     tournament_id = createTournament()
     if type(tournament_id) != int:
         raise ValueError(
@@ -167,6 +168,7 @@ def testTournamentFunctions():
 def testReportMatchTie():
     deleteMatches()
     deletePlayers()
+    deleteTournaments()
     id1 = registerPlayer("Luis Lagos")
     id2 = registerPlayer("Brian Quach")
     reportMatch(id1, id2, True)
@@ -184,6 +186,49 @@ def testReportMatchTie():
             )
     print "11. After one match each player has a tie."
 
+def testBye():
+    deleteMatches()
+    deletePlayers()
+    deleteTournaments()
+    createTournament()
+    id1 = registerPlayer("Macky Mac")
+    pairings = swissPairings()
+    if not doesPlayerHaveBye(id1):
+        raise ValueError(
+            "After pairings, since only one player, doesPlayerHaveBye() should"
+            " return True"
+        )
+    print ("12. After pairings, since only one player, doesPlayerHaveBye() "
+           "returns True")
+
+def testPairingsWithByes():
+    deleteMatches()
+    deletePlayers()
+    deleteTournaments()
+    createTournament()
+    id1 = registerPlayer("Twilight Sparkle")
+    id2 = registerPlayer("Fluttershy")
+    id3 = registerPlayer("Applejack")
+    id4 = registerPlayer("Pinkie Pie")
+    id5 = registerPlayer("Global Potatoe")
+    reportMatch(id1, id2)
+    reportMatch(id3, id4)
+    pairings = swissPairings()
+    if len(pairings) != 2:
+        raise ValueError(
+            "For five players, swissPairings should return two pairs, one "
+            "player gets a bye."
+        )
+    [(pid1, pname1, pid2, pname2), (pid3, pname3, pid4, pname4)] = pairings
+    correct_pairs = set([frozenset([id1, id3]), frozenset([id2, id4])])
+    actual_pairs = set([frozenset([pid1, pid2]), frozenset([pid3, pid4])])
+    if correct_pairs != actual_pairs:
+        raise ValueError(
+            "After one match, players with one win should be paired."
+        )
+    print ("13. After one match, players with one win are paired and one "
+           "player has a bye")
+
 if __name__ == '__main__':
     testDeleteMatches()
     testDelete()
@@ -196,4 +241,6 @@ if __name__ == '__main__':
     testDeleteTournaments()
     testTournamentFunctions()
     testReportMatchTie()
+    testBye()
+    testPairingsWithByes()
     print "Success!  All tests pass!"

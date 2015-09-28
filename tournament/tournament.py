@@ -85,9 +85,9 @@ def playerStandings(include_ties=False):
     conn = connect()
     c = conn.cursor()
     if include_ties:
-        c.execute("SELECT * FROM playerStandingWithTies")
+        c.execute("SELECT * FROM player_standing_with_tie")
     else:
-        c.execute("SELECT * FROM playerStanding")
+        c.execute("SELECT * FROM player_standing")
     player_standings = c.fetchall()
     conn.close()
     return player_standings
@@ -95,6 +95,9 @@ def playerStandings(include_ties=False):
 
 def reportMatch(winner, loser, is_tie=False):
     """Records the outcome of a single match between two players.
+
+    If there is a winner but no loser then the winner has received a 'bye' or a
+    free win. A player cannot have more than 'bye' in a tournament.
 
     Args:
       winner: the id number of the player who won
@@ -125,6 +128,10 @@ def swissPairings():
     player with an equal or nearly-equal win record, that is, a player adjacent
     to him or her in the standings.
 
+    If there are an odd number of players, one of the players will receive a
+    'bye' if they haven't already; if a player already has a 'bye', then
+    another player will be chosen.
+
     Returns:
       A list of tuples, each of which contains (id1, name1, id2, name2)
         id1: the first player's unique id
@@ -148,7 +155,7 @@ def swissPairings():
                 player_two[1]
             ))
         else:
-            pairings.push((player_one[0], player_one[1], None, None))
+            reportMatch(player_one[0], None, False)
         index += 1
     return pairings
 
@@ -187,3 +194,25 @@ def activeTournamentId():
     tournament_id = createTournament() if row is None else row[0]
     conn.close()
     return tournament_id
+
+
+def doesPlayerHaveBye(player):
+    """Returns the number of byes a player has in the current tournament.
+
+    Args:
+      player: id of player to check for bye.
+
+    Returns:
+      A boolean; True if player has a bye in this active tournament, otherwise
+      False.
+    """
+    conn = connect()
+    c = conn.cursor()
+    tournament_id = activeTournamentId()
+    c.execute(
+        "SELECT * FROM player_bye WHERE tournamentId = %s AND winnerId = %s",
+        (tournament_id, player)
+    )
+    row = c.fetchone()
+    conn.close()
+    return row is not None;
