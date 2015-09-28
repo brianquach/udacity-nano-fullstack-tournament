@@ -1,7 +1,7 @@
-#!/usr/bin/env python
-# 
-# tournament.py -- implementation of a Swiss-system tournament
-#
+"""
+Copyright 2015 Brian Quach
+Licensed under MIT (https://github.com/brianquach/udacity-nano-fullstack-tournament/blob/master/LICENSE)  # noqa
+"""
 import psycopg2
 
 
@@ -41,10 +41,10 @@ def countPlayers():
 
 def registerPlayer(name):
     """Adds a player to the tournament database.
-  
+
     The database assigns a unique serial id number for the player.  (This
     should be handled by your SQL database schema, not in your Python code.)
-  
+
     Args:
       name: the player's full name (need not be unique).
 
@@ -55,17 +55,17 @@ def registerPlayer(name):
     c = conn.cursor()
     tournament_id = activeTournamentId()
     c.execute("INSERT INTO player (name, tournamentId) VALUES (%s, %s) "
-        "RETURNING id", (name, tournament_id))
+              "RETURNING id", (name, tournament_id))
     player_id = c.fetchone()[0]
     conn.commit()
     conn.close()
     return player_id
- 
 
-def playerStandings(include_ties = False):
+
+def playerStandings(include_ties=False):
     """Returns a list of the players and their win records, sorted by wins.
 
-    The first entry in the list should be the player in first place, or a 
+    The first entry in the list should be the player in first place, or a
     player tied for first place if there is currently a tie. Optional parameter
     include_ties added in for backwards compatability with original test cases
     from the code fork.
@@ -93,7 +93,7 @@ def playerStandings(include_ties = False):
     return player_standings
 
 
-def reportMatch(winner, loser, is_tie = False):
+def reportMatch(winner, loser, is_tie=False):
     """Records the outcome of a single match between two players.
 
     Args:
@@ -106,25 +106,25 @@ def reportMatch(winner, loser, is_tie = False):
     tournament_id = activeTournamentId()
     if is_tie:
         c.execute("INSERT INTO match_tie (playerOneId, playerTwoId) VALUES "
-            "(%s, %s) RETURNING id", (winner, loser))        
+                  "(%s, %s) RETURNING id", (winner, loser))
         tie_id = c.fetchone()[0]
         c.execute("INSERT INTO match (tournamentId, tieId) VALUES "
-            "(%s, %s)", (tournament_id, tie_id))
+                  "(%s, %s)", (tournament_id, tie_id))
     else:
         c.execute("INSERT INTO match (tournamentId, winnerId, loserId) VALUES "
-            "(%s, %s, %s)", (tournament_id, winner, loser))
+                  "(%s, %s, %s)", (tournament_id, winner, loser))
     conn.commit()
     conn.close()
 
 
 def swissPairings():
     """Returns a list of pairs of players for the next round of a match.
-  
+
     Assuming that there are an even number of players registered, each player
     appears exactly once in the pairings.  Each player is paired with another
     player with an equal or nearly-equal win record, that is, a player adjacent
     to him or her in the standings.
-  
+
     Returns:
       A list of tuples, each of which contains (id1, name1, id2, name2)
         id1: the first player's unique id

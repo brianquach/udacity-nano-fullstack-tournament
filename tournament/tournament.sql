@@ -1,3 +1,7 @@
+/*
+Copyright 2015 Brian Quach
+Licensed under MIT (https://github.com/brianquach/udacity-nano-fullstack-tournament/blob/master/LICENSE)
+*/
 -- Ensure fresh database scheme
 DROP DATABASE tournament;
 CREATE DATABASE tournament;
