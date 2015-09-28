@@ -2,6 +2,7 @@
 Copyright 2015 Brian Quach
 Licensed under MIT (https://github.com/brianquach/udacity-nano-fullstack-tournament/blob/master/LICENSE)  # noqa
 """
+import random
 import psycopg2
 
 
@@ -130,6 +131,9 @@ def swissPairings():
     player with an equal or nearly-equal win record, that is, a player adjacent
     to him or her in the standings.
 
+    Swiss pairing structured after Wizard's swiss-pairing system:
+      http://www.wizards.com/dci/downloads/swiss_pairings.pdf
+
     Returns:
       A list of tuples, each of which contains (id1, name1, id2, name2)
         id1: the first player's unique id
@@ -138,14 +142,21 @@ def swissPairings():
         name2: the second player's name
     """
     pairings = []
-    standings = playerStandings()
+    players = playerStandings()
     index = 0
-    player_count = len(standings)
+    player_count = len(players)
+    if player_count == 0:
+        return []
+
+    matchCount = players[0][3]
+    if matchCount == 0:
+        random.shuffle(players)
+
     while index < player_count:
-        player_one = standings[index]
+        player_one = players[index]
         index += 1
         if (index < player_count):
-            player_two = standings[index]
+            player_two = players[index]
             pairings.append((
                 player_one[0],
                 player_one[1],
