@@ -80,14 +80,19 @@ def playerStandings(include_ties=False):
         name: the player's full name (as registered)
         wins: the number of matches the player has won
         matches: the number of matches the player has played
-        ties (optional): the number of matches the player has tied
+      Or when include_ties is True a list of tupes, each of which contains the
+      above and (ties, tournamentId):
+        ties: the number of matches the player has tied
+        tournamentId: the tournament's unique id (assigned by the database)
     """
     conn = connect()
     c = conn.cursor()
     if include_ties:
-        c.execute("SELECT * FROM playerStandingWithTies")
+        tournament_id = activeTournamentId()
+        c.execute("SELECT * FROM playerStanding WHERE tournamentId = %s",
+            (tournament_id,))
     else:
-        c.execute("SELECT * FROM playerStanding")
+        c.execute("SELECT * FROM playerStandingForOriginalTest")
     player_standings = c.fetchall()
     conn.close()
     return player_standings

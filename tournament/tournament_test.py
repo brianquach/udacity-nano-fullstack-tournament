@@ -171,7 +171,7 @@ def testReportMatchTie():
     id2 = registerPlayer("Brian Quach")
     reportMatch(id1, id2, True)
     standings = playerStandings(True)
-    for (i, n, w, m, t) in standings:
+    for (i, n, w, m, t, tId) in standings:
         if m != 1:
             raise ValueError("Each player should have one match recorded.")
         if w != 0:
