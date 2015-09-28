@@ -1,8 +1,10 @@
-#!/usr/bin/env python
-#
-# Test cases for tournament.py
-
+"""
+The original author of this code is Udacity's Full-Stack Web Developer
+Nanodegree course.
+Code modified by: Brian Quach (13rianquach@gmail.com)
+"""
 from tournament import *
+
 
 def testDeleteMatches():
     deleteMatches()
@@ -84,7 +86,7 @@ def testStandingsBeforeMatches():
             "they have no matches played."
         )
     print ("6. Newly registered players appear in the standings with no "
-    "matches.")
+           "matches.")
 
 
 def testReportMatches():
@@ -144,6 +146,7 @@ def testDeleteTournaments():
     deleteTournaments()
     print "9. Tournaments can be deleted."
 
+
 def testTournamentFunctions():
     tournament_id = createTournament()
     if type(tournament_id) != int:
@@ -158,7 +161,8 @@ def testTournamentFunctions():
             "the Id of the created tournament."
         )
     print ("10. After creating a tournament, activeTournamentId() returns the "
-    "created tournament Id.")
+           "created tournament Id.")
+
 
 def testReportMatchTie():
     deleteMatches()
@@ -193,5 +197,3 @@ if __name__ == '__main__':
     testTournamentFunctions()
     testReportMatchTie()
     print "Success!  All tests pass!"
-
-
