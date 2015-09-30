@@ -88,12 +88,20 @@ def playerStandings(include_ties=False):
     """
     conn = connect()
     c = conn.cursor()
+
+    # The reason why there are two queries below is that the 
+    # playerStandingBasic is used to pass the original Udacity tests for 
+    # backward compatibily. And playerStandingExpanded is used for everything 
+    # else.
+
     if include_ties:
         tournament_id = activeTournamentId()
-        c.execute("SELECT * FROM playerStanding WHERE tournamentId = %s",
-            (tournament_id,))
+        c.execute(
+            "SELECT * FROM playerStandingExpanded WHERE tournamentId = %s",
+            (tournament_id,)
+        )
     else:
-        c.execute("SELECT * FROM playerStandingForOriginalTest")
+        c.execute("SELECT * FROM playerStandingBasic")
     player_standings = c.fetchall()
     conn.close()
     return player_standings

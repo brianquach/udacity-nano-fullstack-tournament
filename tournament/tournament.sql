@@ -30,7 +30,7 @@ CREATE TABLE match (
 );
 
 -- View definitions
-CREATE VIEW playerStandingForOriginalTest AS (
+CREATE VIEW playerStandingBasic AS (
     SELECT p.id, p.name, COUNT(m.winnerId) AS wins, COUNT(m.winnerId) + COUNT(m2.loserID) + COUNT(mt.id) AS matches
     FROM player p
         LEFT JOIN match m ON p.id = m.winnerId
@@ -39,7 +39,7 @@ CREATE VIEW playerStandingForOriginalTest AS (
     GROUP BY p.id, m.winnerId, m2.loserId, mt.id
     ORDER BY wins DESC
 );
-CREATE VIEW playerStanding AS (
+CREATE VIEW playerStandingExpanded AS (
     SELECT p.id, p.name, COUNT(m.winnerId) AS wins, COUNT(m.winnerId) + COUNT(m2.loserID) + COUNT(mt.id) AS matches, COUNT(mt.id) AS ties, p.tournamentId
     FROM player p
         LEFT JOIN match m ON p.id = m.winnerId
