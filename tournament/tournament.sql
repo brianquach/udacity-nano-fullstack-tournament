@@ -49,7 +49,7 @@ CREATE VIEW player_standing_expanded AS (
     ORDER BY wins DESC
 );
 CREATE VIEW player_bye AS (
-    SELECT winnerId
+    SELECT winnerId, tournamentId
     FROM match
     WHERE (winnerId IS NOT NULL) AND (loserId IS NULL) AND (tieId IS NULL)
 );

@@ -146,7 +146,7 @@ def swissPairings():
 
     Swiss pairing structured after Wizard's swiss-pairing system:
       http://www.wizards.com/dci/downloads/swiss_pairings.pdf
-      
+
     Returns:
       A list of tuples, each of which contains (id1, name1, id2, name2)
         id1: the first player's unique id
@@ -177,7 +177,7 @@ def swissPairings():
                 player_two[1]
             ))
         else:
-            reportMatch(player_one[0], None, False)
+            reportMatch(player_one[0], None, False)  # assign odd player a bye
         index += 1
     return pairings
 
