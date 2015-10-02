@@ -2,6 +2,7 @@
 Copyright 2015 Brian Quach
 Licensed under MIT (https://github.com/brianquach/udacity-nano-fullstack-tournament/blob/master/LICENSE)  # noqa
 """
+import random
 import psycopg2
 
 
@@ -80,14 +81,25 @@ def playerStandings(include_ties=False):
         name: the player's full name (as registered)
         wins: the number of matches the player has won
         matches: the number of matches the player has played
-        ties (optional): the number of matches the player has tied
+      Or when include_ties is True a list of tupes, each of which contains the
+      above and (ties, tournamentId):
+        ties: the number of matches the player has tied
+        tournamentId: the tournament's unique id (assigned by the database)
     """
     conn = connect()
     c = conn.cursor()
+
+    # The reason why there are two queries below is that the 
+    # playerStandingBasic is used to pass the original Udacity tests for 
+    # backward compatibily. And playerStandingExpanded is used for everything 
+    # else.
+
     if include_ties:
-        c.execute("SELECT * FROM player_standing_with_tie")
+        tournament_id = activeTournamentId()
+        c.execute("SELECT * FROM player_standing_expanded WHERE "
+            "tournamentId = %s", (tournament_id,))
     else:
-        c.execute("SELECT * FROM player_standing")
+        c.execute("SELECT * FROM player_standing_basic")
     player_standings = c.fetchall()
     conn.close()
     return player_standings
@@ -132,6 +144,9 @@ def swissPairings():
     'bye' if they haven't already; if a player already has a 'bye', then
     another player will be chosen.
 
+    Swiss pairing structured after Wizard's swiss-pairing system:
+      http://www.wizards.com/dci/downloads/swiss_pairings.pdf
+      
     Returns:
       A list of tuples, each of which contains (id1, name1, id2, name2)
         id1: the first player's unique id
@@ -140,14 +155,21 @@ def swissPairings():
         name2: the second player's name
     """
     pairings = []
-    standings = playerStandings()
+    players = playerStandings()
     index = 0
-    player_count = len(standings)
+    player_count = len(players)
+    if player_count == 0:
+        return []
+
+    matchCount = players[0][3]
+    if matchCount == 0:
+        random.shuffle(players)
+
     while index < player_count:
-        player_one = standings[index]
+        player_one = players[index]
         index += 1
         if (index < player_count):
-            player_two = standings[index]
+            player_two = players[index]
             pairings.append((
                 player_one[0],
                 player_one[1],
