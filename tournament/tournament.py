@@ -66,10 +66,11 @@ def registerPlayer(name):
 def playerStandings(include_ties=False):
     """Returns a list of the players and their win records, sorted by wins.
 
-    The first entry in the list should be the player in first place, or a
-    player tied for first place if there is currently a tie. Optional parameter
-    include_ties added in for backwards compatability with original test cases
-    from the code fork.
+    Player standings are ranked in descending order first by wins, then ties,
+    then Opponent Match Wins (OMW). OMW is the total number of points based on
+    wins (4 pts) and ties (1pt) by opponents a player has played against.
+    Optional parameter include_ties added in for backwards compatability with
+    original test cases from the code fork.
 
     Args:
       include_ties: if true return the number of ties to the tuple being
