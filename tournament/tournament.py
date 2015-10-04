@@ -63,17 +63,17 @@ def registerPlayer(name):
     return player_id
 
 
-def playerStandings(include_ties=False):
+def playerStandings(show_all_columns=False):
     """Returns a list of the players and their win records, sorted by wins.
-
+    
     Player standings are ranked in descending order first by wins, then ties,
     then Opponent Match Wins (OMW). OMW is the total number of points based on
     wins (4 pts) and ties (1pt) by opponents a player has played against.
-    Optional parameter include_ties added in for backwards compatability with
-    original test cases from the code fork.
+    Optional parameter show_all_columns added in for backwards compatability 
+    with original test cases from the code fork.
 
     Args:
-      include_ties: if true return the number of ties to the tuple being
+      show_all_columns: if true all the columns from playerStanding will be
         returned.
 
     Returns:
@@ -82,10 +82,11 @@ def playerStandings(include_ties=False):
         name: the player's full name (as registered)
         wins: the number of matches the player has won
         matches: the number of matches the player has played
-      Or when include_ties is True a list of tupes, each of which contains the
-      above and (ties, tournamentId):
-        ties: the number of matches the player has tied
+      Or when show_all_columns is True a list of tupes, each of which contains 
+      the above and (tournamentId, losses, ties):
         tournamentId: the tournament's unique id (assigned by the database)
+        losses: the number of matches the player has lost
+        ties: the number of matches the player has tied
     """
     conn = connect()
     c = conn.cursor()
@@ -95,14 +96,11 @@ def playerStandings(include_ties=False):
     # backward compatibily. And playerStandingExpanded is used for everything 
     # else.
 
-    if include_ties:
-        tournament_id = activeTournamentId()
-        c.execute(
-            "SELECT * FROM playerStandingExpanded WHERE tournamentId = %s",
-            (tournament_id,)
-        )
-    else:
-        c.execute("SELECT * FROM playerStandingBasic")
+    tournament_id = activeTournamentId()
+    query = "SELECT {0} FROM playerStanding WHERE tournamentId = %s".format(
+        "*" if show_all_columns else "id, name, wins, matches"
+    )
+    c.execute(query, (tournament_id,))
     player_standings = c.fetchall()
     conn.close()
     return player_standings
@@ -130,7 +128,8 @@ def reportMatch(winner, loser, is_tie=False):
     else:
         c.execute(
             "INSERT INTO match (tournamentId, winnerId, loserId, isTie) VALUES"
-            "(%s, %s, %s) RETURNING id", (tournament_id, winner, loser, is_tie)
+            "(%s, %s, %s, %s) RETURNING id", (tournament_id, winner, loser, 
+                is_tie)
         )
     conn.commit()
     conn.close()

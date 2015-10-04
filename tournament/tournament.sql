@@ -29,20 +29,27 @@ CREATE TABLE match_tie (
 );
 
 -- View definitions
-CREATE VIEW playerStandingBasic AS (
-    SELECT p.id, p.name, COUNT(m.winnerId) AS wins, COUNT(m.winnerId) + COUNT(m2.loserID) AS matches
+CREATE VIEW playerStanding AS (
+    SELECT 
+        p.tournamentId,
+        p.id, 
+        p.name,
+        COALESCE(w.wins, 0) wins,
+        COALESCE(l.losses, 0) losses,
+        COALESCE(t.ties, 0) ties,
+        COALESCE(w.wins, 0) + COALESCE(l.losses, 0) + COALESCE(t.ties, 0) matches
     FROM player p
-        LEFT JOIN match m ON p.id = m.winnerId
-        LEFT JOIN match m2 ON p.id = m2.loserId
-    GROUP BY p.id, m.winnerId, m2.loserId
-    ORDER BY wins DESC
-);
-CREATE VIEW playerStandingExpanded AS (
-    SELECT p.id, p.name, COUNT(m.winnerId) AS wins, COUNT(m.winnerId) + COUNT(m2.loserID) + COUNT(mt.playerId) AS matches, COUNT(mt.playerId) AS ties, p.tournamentId
-    FROM player p
-        LEFT JOIN match m ON p.id = m.winnerId
-        LEFT JOIN match m2 ON p.id = m2.loserId
-        LEFT JOIN match_tie mt ON p.id = mt.playerId
-    GROUP BY p.tournamentId, p.id, m.winnerId, m2.loserId, mt.playerId
+        LEFT JOIN (SELECT winnerId, COUNT(winnerId) wins
+            FROM match
+            GROUP BY winnerId
+        ) w ON p.id = w.winnerId
+        LEFT JOIN (SELECT loserId, COUNT(loserId) losses
+            FROM match
+            GROUP BY loserId
+        ) l ON p.id = l.loserId 
+        LEFT JOIN (SELECT playerId, COUNT(playerId) ties
+            FROM match_tie
+            GROUP BY playerId
+        ) t ON p.id = t.playerId
     ORDER BY wins DESC
 );

@@ -171,7 +171,7 @@ def testReportMatchTie():
     id2 = registerPlayer("Brian Quach")
     reportMatch(id1, id2, True)
     standings = playerStandings(True)
-    for (i, n, w, m, t, tId) in standings:
+    for (tId, i, n, w, l, t, m) in standings:
         if m != 1:
             raise ValueError("Each player should have one match recorded.")
         if w != 0:
@@ -249,16 +249,16 @@ def testPlayerStandingsWithOpponentMatchWins():
     print "12. NOT DONE"
 
 if __name__ == '__main__':
-    # testDeleteMatches()
-    # testDelete()
-    # testCount()
-    # testRegister()
-    # testRegisterCountDelete()
-    # testStandingsBeforeMatches()
-    # testReportMatches()
-    # testPairings()
-    # testDeleteTournaments()
-    # testTournamentFunctions()
-    # testReportMatchTie()
+    testDeleteMatches()
+    testDelete()
+    testCount()
+    testRegister()
+    testRegisterCountDelete()
+    testStandingsBeforeMatches()
+    testReportMatches()
+    testPairings()
+    testDeleteTournaments()
+    testTournamentFunctions()
+    testReportMatchTie()
     testPlayerStandingsWithOpponentMatchWins()
     print "Success!  All tests pass!"
