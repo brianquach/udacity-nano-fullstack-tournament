@@ -184,16 +184,81 @@ def testReportMatchTie():
             )
     print "11. After one match each player has a tie."
 
+def testPlayerStandingsWithOpponentMatchWins():
+    deleteMatches()
+    deletePlayers()
+    deleteTournaments()
+    id1 = registerPlayer("A")
+    id2 = registerPlayer("B")
+    id3 = registerPlayer("C")
+    id4 = registerPlayer("D")
+    id5 = registerPlayer("E")
+    id6 = registerPlayer("F")
+    id7 = registerPlayer("G")
+    id8 = registerPlayer("H")
+    id9 = registerPlayer("I")
+    id10 = registerPlayer("J")
+    id11 = registerPlayer("K")
+    id12 = registerPlayer("L")
+    id13 = registerPlayer("M")
+    id14 = registerPlayer("N")
+    id15 = registerPlayer("O")
+
+    # First Round
+    reportMatch(id1, id2)
+    reportMatch(id3, id4)
+    reportMatch(id5, id6)
+    reportMatch(id7, id8)
+    reportMatch(id9, id10)
+    reportMatch(id11, id12)
+    reportMatch(id13, id14, True)
+    reportMatch(id15, None)
+
+    # Second Round
+    reportMatch(id1, id3)
+    reportMatch(id7, id5)
+    reportMatch(id9, id11)
+    reportMatch(id13, id15, True)
+    reportMatch(id2, id4)
+    reportMatch(id8, id6)
+    reportMatch(id10, id12)
+    reportMatch(id14, None)
+
+    # Third Round
+    reportMatch(id7, id1)
+    reportMatch(id9, id15)
+    reportMatch(id14, id2)
+    reportMatch(id3, id5)
+    reportMatch(id10, id8)
+    reportMatch(id13, id11)
+    reportMatch(id4, id12, True)
+    reportMatch(id6, None)
+
+    # Final Round
+    reportMatch(id7, id9, True)
+    reportMatch(id14, id1)
+    reportMatch(id3, id10, True)
+    reportMatch(id13, id8)
+    reportMatch(id15, id11)
+    reportMatch(id2, id5)
+    reportMatch(id4, id6, True)
+    reportMatch(id12, None)
+
+    print playerStandings(True)
+
+    print "12. NOT DONE"
+
 if __name__ == '__main__':
-    testDeleteMatches()
-    testDelete()
-    testCount()
-    testRegister()
-    testRegisterCountDelete()
-    testStandingsBeforeMatches()
-    testReportMatches()
-    testPairings()
-    testDeleteTournaments()
-    testTournamentFunctions()
-    testReportMatchTie()
+    # testDeleteMatches()
+    # testDelete()
+    # testCount()
+    # testRegister()
+    # testRegisterCountDelete()
+    # testStandingsBeforeMatches()
+    # testReportMatches()
+    # testPairings()
+    # testDeleteTournaments()
+    # testTournamentFunctions()
+    # testReportMatchTie()
+    testPlayerStandingsWithOpponentMatchWins()
     print "Success!  All tests pass!"
