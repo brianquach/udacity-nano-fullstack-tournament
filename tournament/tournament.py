@@ -15,8 +15,8 @@ def deleteMatches():
     """Remove all the match records from the database."""
     conn = connect()
     c = conn.cursor()
-    c.execute("DELETE FROM match")
     c.execute("DELETE FROM match_tie")
+    c.execute("DELETE FROM match")
     conn.commit()
     conn.close()
 
@@ -119,14 +119,18 @@ def reportMatch(winner, loser, is_tie=False):
     c = conn.cursor()
     tournament_id = activeTournamentId()
     if is_tie:
-        c.execute("INSERT INTO match_tie (playerOneId, playerTwoId) VALUES "
-                  "(%s, %s) RETURNING id", (winner, loser))
-        tie_id = c.fetchone()[0]
-        c.execute("INSERT INTO match (tournamentId, tieId) VALUES "
-                  "(%s, %s)", (tournament_id, tie_id))
+        c.execute(
+            "INSERT INTO match (tournamentId, isTie) VALUES"
+            "(%s, %s) RETURNING id", (tournament_id, is_tie)
+        )   
+        match_id = c.fetchone()[0]
+        c.execute("INSERT INTO match_tie (matchId, playerId) VALUES "
+                  "(%s, %s), (%s, %s)", (match_id, winner, match_id, loser))
     else:
-        c.execute("INSERT INTO match (tournamentId, winnerId, loserId) VALUES "
-                  "(%s, %s, %s)", (tournament_id, winner, loser))
+        c.execute(
+            "INSERT INTO match (tournamentId, winnerId, loserId, isTie) VALUES"
+            "(%s, %s, %s) RETURNING id", (tournament_id, winner, loser, is_tie)
+        )
     conn.commit()
     conn.close()
 
