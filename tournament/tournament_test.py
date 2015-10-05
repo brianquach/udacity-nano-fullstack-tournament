@@ -171,7 +171,7 @@ def testReportMatchTie():
     id2 = registerPlayer("Brian Quach")
     reportMatch(id1, id2, True)
     standings = playerStandings(True)
-    for (tId, i, n, w, l, t, m) in standings:
+    for (tId, i, n, w, l, t, m, omw) in standings:
         if m != 1:
             raise ValueError("Each player should have one match recorded.")
         if w != 0:
@@ -244,9 +244,43 @@ def testPlayerStandingsWithOpponentMatchWins():
     reportMatch(id4, id6, True)
     reportMatch(id12, None)
 
-    print playerStandings(True)
-
-    print "12. NOT DONE"
+    player_standings = playerStandings(True)
+    [p1, p2, p3, p4, p5, p6, p7, p8, 
+     p9, p10, p11, p12, p13, p14, p15] = [row for row in player_standings]
+    if p1[1] != "I" and p1[7] != 35:
+        raise ValueError("Player I should be first with OMW of 35")
+    if p2[1] != "G" and p2[7] != 29:
+        raise ValueError("Player I should be second with OMW of 29")
+    if p3[1] != "N" and p3[7] != 26:
+        raise ValueError("Player I should be third with OMW of 26")
+    if p4[1] != "M" and p4[7] != 30:
+        raise ValueError("Player I should be forth with OMW of 30")            
+    if p5[1] != "J" and p5[7] != 31:
+        raise ValueError("Player A should be fifth with OMW of 31")
+    if p6[1] != "O" and p6[7] != 27:
+        raise ValueError("Player I should be sixth with OMW of 27")
+    if p7[1] != "C" and p7[7] != 23:
+        raise ValueError("Player I should be seventh with OMW of 23")
+    if p8[1] != "A" and p8[7] != 43:
+        raise ValueError("Player I should be eighth with OMW of 43")
+    if p9[1] != "B" and p9[7] != 27:
+        raise ValueError("Player I should be ninth with OMW of 27")
+    if p10[1] != "L" and p10[7] != 15:
+        raise ValueError("Player I should be tenth with OMW of 15")
+    if p11[1] != "F" and p11[7] != 10:
+        raise ValueError("Player I should be eleventh with OMW of 10")
+    if p12[1] != "K" and p12[7] != 37:
+        raise ValueError("Player I should be twelfth with OMW of 37")
+    if p13[1] != "H" and p13[7] != 37:
+        raise ValueError("Player I should be thirteenth with OMW of 37")
+    if p14[1] != "E" and p14[7] != 35:
+        raise ValueError("Player D should be fourteenth with OMW of 35")
+    if p15[1] != "D" and p15[7] != 27:
+        raise ValueError("Player I should be fifteenth with OMW of 27")
+    print (
+        "12. After a full swiss-tournament players are ranked from first to "
+        "last as follows: I, G, N, M, J, O, C, A, B, L, F, K, H, E, D"
+    )
 
 if __name__ == '__main__':
     testDeleteMatches()
