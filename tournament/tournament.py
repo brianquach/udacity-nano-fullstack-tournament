@@ -67,10 +67,13 @@ def playerStandings(show_all_columns=False):
     """Returns a list of the players and their win records, sorted by wins.
     
     Player standings are ranked in descending order first by wins, then ties,
-    then Opponent Match Wins (OMW). OMW is the total number of points based on
-    wins (4 pts) and ties (1pt) by opponents a player has played against.
-    Optional parameter show_all_columns added in for backwards compatability 
-    with original test cases from the code fork.
+    then Opponent Match Wins (OMW). OMW is the total number of match points 
+    based on wins (4 pts) and ties (1pt) by opponents a player has played 
+    against. Optional parameter show_all_columns added in for backwards 
+    compatability with original test cases from the code fork.
+
+    Opponent Match Wins based off Wizard's OMW:
+      https://www.wizards.com/dci/downloads/tiebreakers.pdf
 
     Args:
       show_all_columns: if true all the columns from playerStanding will be
@@ -83,10 +86,11 @@ def playerStandings(show_all_columns=False):
         wins: the number of matches the player has won
         matches: the number of matches the player has played
       Or when show_all_columns is True a list of tupes, each of which contains 
-      the above and (tournamentId, losses, ties):
+      the above and (tournamentId, losses, ties, omw):
         tournamentId: the tournament's unique id (assigned by the database)
         losses: the number of matches the player has lost
         ties: the number of matches the player has tied
+        omw: the total points added up from player's opponent's wins and ties
     """
     conn = connect()
     c = conn.cursor()
