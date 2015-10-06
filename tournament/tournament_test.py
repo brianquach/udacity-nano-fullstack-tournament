@@ -173,7 +173,7 @@ def testReportMatchTie():
     id2 = registerPlayer("Brian Quach")
     reportMatch(id1, id2, True)
     standings = playerStandings(True)
-    for (i, n, w, m, t, tId) in standings:
+    for (tId, i, n, w, l, t, m, omw) in standings:
         if m != 1:
             raise ValueError("Each player should have one match recorded.")
         if w != 0:
@@ -185,6 +185,7 @@ def testReportMatchTie():
                 "Each player should have one tie recorded"
             )
     print "11. After one match each player has a tie."
+
 
 def testBye():
     deleteMatches()
@@ -201,33 +202,103 @@ def testBye():
     print ("12. After pairings, since only one player, doesPlayerHaveBye() "
            "returns True")
 
-def testPairingsWithByes():
+def testPlayerStandingsWithOpponentMatchWins():
     deleteMatches()
     deletePlayers()
     deleteTournaments()
-    createTournament()
-    id1 = registerPlayer("Twilight Sparkle")
-    id2 = registerPlayer("Fluttershy")
-    id3 = registerPlayer("Applejack")
-    id4 = registerPlayer("Pinkie Pie")
-    id5 = registerPlayer("Global Potatoe")
+    id1 = registerPlayer("A")
+    id2 = registerPlayer("B")
+    id3 = registerPlayer("C")
+    id4 = registerPlayer("D")
+    id5 = registerPlayer("E")
+    id6 = registerPlayer("F")
+    id7 = registerPlayer("G")
+    id8 = registerPlayer("H")
+    id9 = registerPlayer("I")
+    id10 = registerPlayer("J")
+    id11 = registerPlayer("K")
+    id12 = registerPlayer("L")
+    id13 = registerPlayer("M")
+    id14 = registerPlayer("N")
+    id15 = registerPlayer("O")
+
+    # First Round
     reportMatch(id1, id2)
     reportMatch(id3, id4)
-    pairings = swissPairings()
-    if len(pairings) != 2:
-        raise ValueError(
-            "For five players, swissPairings should return two pairs, one "
-            "player gets a bye."
-        )
-    [(pid1, pname1, pid2, pname2), (pid3, pname3, pid4, pname4)] = pairings
-    correct_pairs = set([frozenset([id1, id3]), frozenset([id2, id4])])
-    actual_pairs = set([frozenset([pid1, pid2]), frozenset([pid3, pid4])])
-    if correct_pairs != actual_pairs:
-        raise ValueError(
-            "After one match, players with one win should be paired."
-        )
-    print ("13. After one match, players with one win are paired and one "
-           "player has a bye")
+    reportMatch(id5, id6)
+    reportMatch(id7, id8)
+    reportMatch(id9, id10)
+    reportMatch(id11, id12)
+    reportMatch(id13, id14, True)
+    reportMatch(id15, None)
+
+    # Second Round
+    reportMatch(id1, id3)
+    reportMatch(id7, id5)
+    reportMatch(id9, id11)
+    reportMatch(id13, id15, True)
+    reportMatch(id2, id4)
+    reportMatch(id8, id6)
+    reportMatch(id10, id12)
+    reportMatch(id14, None)
+
+    # Third Round
+    reportMatch(id7, id1)
+    reportMatch(id9, id15)
+    reportMatch(id14, id2)
+    reportMatch(id3, id5)
+    reportMatch(id10, id8)
+    reportMatch(id13, id11)
+    reportMatch(id4, id12, True)
+    reportMatch(id6, None)
+
+    # Final Round
+    reportMatch(id7, id9, True)
+    reportMatch(id14, id1)
+    reportMatch(id3, id10, True)
+    reportMatch(id13, id8)
+    reportMatch(id15, id11)
+    reportMatch(id2, id5)
+    reportMatch(id4, id6, True)
+    reportMatch(id12, None)
+
+    player_standings = playerStandings(True)
+    [p1, p2, p3, p4, p5, p6, p7, p8, 
+     p9, p10, p11, p12, p13, p14, p15] = [row for row in player_standings]
+    if p1[1] != "I" and p1[7] != 35:
+        raise ValueError("Player I should be first with OMW of 35")
+    if p2[1] != "G" and p2[7] != 29:
+        raise ValueError("Player I should be second with OMW of 29")
+    if p3[1] != "N" and p3[7] != 26:
+        raise ValueError("Player I should be third with OMW of 26")
+    if p4[1] != "M" and p4[7] != 30:
+        raise ValueError("Player I should be forth with OMW of 30")            
+    if p5[1] != "J" and p5[7] != 31:
+        raise ValueError("Player A should be fifth with OMW of 31")
+    if p6[1] != "O" and p6[7] != 27:
+        raise ValueError("Player I should be sixth with OMW of 27")
+    if p7[1] != "C" and p7[7] != 23:
+        raise ValueError("Player I should be seventh with OMW of 23")
+    if p8[1] != "A" and p8[7] != 43:
+        raise ValueError("Player I should be eighth with OMW of 43")
+    if p9[1] != "B" and p9[7] != 27:
+        raise ValueError("Player I should be ninth with OMW of 27")
+    if p10[1] != "L" and p10[7] != 15:
+        raise ValueError("Player I should be tenth with OMW of 15")
+    if p11[1] != "F" and p11[7] != 10:
+        raise ValueError("Player I should be eleventh with OMW of 10")
+    if p12[1] != "K" and p12[7] != 37:
+        raise ValueError("Player I should be twelfth with OMW of 37")
+    if p13[1] != "H" and p13[7] != 37:
+        raise ValueError("Player I should be thirteenth with OMW of 37")
+    if p14[1] != "E" and p14[7] != 35:
+        raise ValueError("Player D should be fourteenth with OMW of 35")
+    if p15[1] != "D" and p15[7] != 27:
+        raise ValueError("Player I should be fifteenth with OMW of 27")
+    print (
+        "13. After a full swiss-tournament players are ranked from first to "
+        "last as follows: I, G, N, M, J, O, C, A, B, L, F, K, H, E, D"
+    )
 
 if __name__ == '__main__':
     testDeleteMatches()
@@ -242,5 +313,5 @@ if __name__ == '__main__':
     testTournamentFunctions()
     testReportMatchTie()
     testBye()
-    testPairingsWithByes()
+    testPlayerStandingsWithOpponentMatchWins()
     print "Success!  All tests pass!"

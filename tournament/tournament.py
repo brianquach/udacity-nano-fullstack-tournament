@@ -15,8 +15,8 @@ def deleteMatches():
     """Remove all the match records from the database."""
     conn = connect()
     c = conn.cursor()
-    c.execute("DELETE FROM match")
     c.execute("DELETE FROM match_tie")
+    c.execute("DELETE FROM match")
     conn.commit()
     conn.close()
 
@@ -63,16 +63,20 @@ def registerPlayer(name):
     return player_id
 
 
-def playerStandings(include_ties=False):
+def playerStandings(show_all_columns=False):
     """Returns a list of the players and their win records, sorted by wins.
+    
+    Player standings are ranked in descending order first by wins, then ties,
+    then Opponent Match Wins (OMW). OMW is the total number of match points 
+    based on wins (4 pts) and ties (1pt) by opponents a player has played 
+    against. Optional parameter show_all_columns added in for backwards 
+    compatability with original test cases from the code fork.
 
-    The first entry in the list should be the player in first place, or a
-    player tied for first place if there is currently a tie. Optional parameter
-    include_ties added in for backwards compatability with original test cases
-    from the code fork.
+    Opponent Match Wins based off Wizard's OMW:
+      https://www.wizards.com/dci/downloads/tiebreakers.pdf
 
     Args:
-      include_ties: if true return the number of ties to the tuple being
+      show_all_columns: if true all the columns from playerStanding will be
         returned.
 
     Returns:
@@ -81,10 +85,12 @@ def playerStandings(include_ties=False):
         name: the player's full name (as registered)
         wins: the number of matches the player has won
         matches: the number of matches the player has played
-      Or when include_ties is True a list of tupes, each of which contains the
-      above and (ties, tournamentId):
-        ties: the number of matches the player has tied
+      Or when show_all_columns is True a list of tupes, each of which contains 
+      the above and (tournamentId, losses, ties, omw):
         tournamentId: the tournament's unique id (assigned by the database)
+        losses: the number of matches the player has lost
+        ties: the number of matches the player has tied
+        omw: the total points added up from player's opponent's wins and ties
     """
     conn = connect()
     c = conn.cursor()
@@ -94,12 +100,11 @@ def playerStandings(include_ties=False):
     # backward compatibily. And playerStandingExpanded is used for everything 
     # else.
 
-    if include_ties:
-        tournament_id = activeTournamentId()
-        c.execute("SELECT * FROM player_standing_expanded WHERE "
-            "tournamentId = %s", (tournament_id,))
-    else:
-        c.execute("SELECT * FROM player_standing_basic")
+    tournament_id = activeTournamentId()
+    query = "SELECT {0} FROM player_standing WHERE tournamentId = %s".format(
+        "*" if show_all_columns else "id, name, wins, matches"
+    )
+    c.execute(query, (tournament_id,))
     player_standings = c.fetchall()
     conn.close()
     return player_standings
@@ -120,14 +125,19 @@ def reportMatch(winner, loser, is_tie=False):
     c = conn.cursor()
     tournament_id = activeTournamentId()
     if is_tie:
-        c.execute("INSERT INTO match_tie (playerOneId, playerTwoId) VALUES "
-                  "(%s, %s) RETURNING id", (winner, loser))
-        tie_id = c.fetchone()[0]
-        c.execute("INSERT INTO match (tournamentId, tieId) VALUES "
-                  "(%s, %s)", (tournament_id, tie_id))
+        c.execute(
+            "INSERT INTO match (tournamentId, isTie) VALUES"
+            "(%s, %s) RETURNING id", (tournament_id, is_tie)
+        )   
+        match_id = c.fetchone()[0]
+        c.execute("INSERT INTO match_tie (matchId, playerId) VALUES "
+                  "(%s, %s), (%s, %s)", (match_id, winner, match_id, loser))
     else:
-        c.execute("INSERT INTO match (tournamentId, winnerId, loserId) VALUES "
-                  "(%s, %s, %s)", (tournament_id, winner, loser))
+        c.execute(
+            "INSERT INTO match (tournamentId, winnerId, loserId, isTie) VALUES"
+            "(%s, %s, %s, %s) RETURNING id", (tournament_id, winner, loser, 
+                is_tie)
+        )
     conn.commit()
     conn.close()
 
