@@ -202,6 +202,7 @@ def testBye():
     print ("12. After pairings, since only one player, doesPlayerHaveBye() "
            "returns True")
 
+
 def testPlayerStandingsWithOpponentMatchWins():
     deleteMatches()
     deletePlayers()
@@ -299,6 +300,8 @@ def testPlayerStandingsWithOpponentMatchWins():
         "13. After a full swiss-tournament players are ranked from first to "
         "last as follows: I, G, N, M, J, O, C, A, B, L, F, K, H, E, D"
     )
+
+
 
 if __name__ == '__main__':
     testDeleteMatches()

@@ -168,12 +168,27 @@ def swissPairings():
     players = playerStandings()
     index = 0
     player_count = len(players)
+    is_player_count_odd = (player_count%2) != 0
     if player_count == 0:
         return []
 
     matchCount = players[0][3]
     if matchCount == 0:
         random.shuffle(players)
+
+    # If there is an odd number of players, a player will be chosen starting
+    # from the top and moving downwards until a player with no 'byes' is found,
+    # to be given a bye. The rest of the players will then be paired.
+
+    if is_player_count_odd:
+        player_with_bye = None
+        for player in players:
+            if not doesPlayerHaveBye(player[0]):
+                reportMatch(player[0], None, False)
+                player_with_bye = player
+                player_count -= 1
+                break
+        players.remove(player_with_bye)
 
     while index < player_count:
         player_one = players[index]
@@ -186,8 +201,6 @@ def swissPairings():
                 player_two[0],
                 player_two[1]
             ))
-        else:
-            reportMatch(player_one[0], None, False)  # assign odd player a bye
         index += 1
     return pairings
 
