@@ -65,11 +65,11 @@ def registerPlayer(name):
 
 def playerStandings(show_all_columns=False):
     """Returns a list of the players and their win records, sorted by wins.
-    
+
     Player standings are ranked in descending order first by wins, then ties,
-    then Opponent Match Wins (OMW). OMW is the total number of match points 
-    based on wins (4 pts) and ties (1pt) by opponents a player has played 
-    against. Optional parameter show_all_columns added in for backwards 
+    then Opponent Match Wins (OMW). OMW is the total number of match points
+    based on wins (4 pts) and ties (1pt) by opponents a player has played
+    against. Optional parameter show_all_columns added in for backwards
     compatability with original test cases from the code fork.
 
     Opponent Match Wins based off Wizard's OMW:
@@ -85,7 +85,7 @@ def playerStandings(show_all_columns=False):
         name: the player's full name (as registered)
         wins: the number of matches the player has won
         matches: the number of matches the player has played
-      Or when show_all_columns is True a list of tupes, each of which contains 
+      Or when show_all_columns is True a list of tupes, each of which contains
       the above and (tournamentId, losses, ties, omw):
         tournamentId: the tournament's unique id (assigned by the database)
         losses: the number of matches the player has lost
@@ -95,9 +95,9 @@ def playerStandings(show_all_columns=False):
     conn = connect()
     c = conn.cursor()
 
-    # The reason why there are two queries below is that the 
-    # playerStandingBasic is used to pass the original Udacity tests for 
-    # backward compatibily. And playerStandingExpanded is used for everything 
+    # The reason why there are two queries below is that the
+    # playerStandingBasic is used to pass the original Udacity tests for
+    # backward compatibily. And playerStandingExpanded is used for everything
     # else.
 
     tournament_id = activeTournamentId()
@@ -128,15 +128,15 @@ def reportMatch(winner, loser, is_tie=False):
         c.execute(
             "INSERT INTO match (tournamentId, isTie) VALUES"
             "(%s, %s) RETURNING id", (tournament_id, is_tie)
-        )   
+        )
         match_id = c.fetchone()[0]
         c.execute("INSERT INTO match_tie (matchId, playerId) VALUES "
                   "(%s, %s), (%s, %s)", (match_id, winner, match_id, loser))
     else:
         c.execute(
             "INSERT INTO match (tournamentId, winnerId, loserId, isTie) VALUES"
-            "(%s, %s, %s, %s) RETURNING id", (tournament_id, winner, loser, 
-                is_tie)
+            "(%s, %s, %s, %s) RETURNING id", (tournament_id, winner, loser,
+                                              is_tie)
         )
     conn.commit()
     conn.close()
@@ -168,7 +168,7 @@ def swissPairings():
     players = playerStandings()
     index = 0
     player_count = len(players)
-    is_player_count_odd = (player_count%2) != 0
+    is_player_count_odd = (player_count % 2) != 0
     if player_count == 0:
         return []
 
@@ -260,4 +260,4 @@ def doesPlayerHaveBye(player):
     )
     row = c.fetchone()
     conn.close()
-    return row is not None;
+    return row is not None

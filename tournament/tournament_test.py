@@ -264,7 +264,7 @@ def testPlayerStandingsWithOpponentMatchWins():
     reportMatch(id12, None)
 
     player_standings = playerStandings(True)
-    [p1, p2, p3, p4, p5, p6, p7, p8, 
+    [p1, p2, p3, p4, p5, p6, p7, p8,
      p9, p10, p11, p12, p13, p14, p15] = [row for row in player_standings]
     if p1[1] != "I" and p1[7] != 35:
         raise ValueError("Player I should be first with OMW of 35")
@@ -273,7 +273,7 @@ def testPlayerStandingsWithOpponentMatchWins():
     if p3[1] != "N" and p3[7] != 26:
         raise ValueError("Player I should be third with OMW of 26")
     if p4[1] != "M" and p4[7] != 30:
-        raise ValueError("Player I should be forth with OMW of 30")            
+        raise ValueError("Player I should be forth with OMW of 30")
     if p5[1] != "J" and p5[7] != 31:
         raise ValueError("Player A should be fifth with OMW of 31")
     if p6[1] != "O" and p6[7] != 27:
@@ -300,7 +300,6 @@ def testPlayerStandingsWithOpponentMatchWins():
         "13. After a full swiss-tournament players are ranked from first to "
         "last as follows: I, G, N, M, J, O, C, A, B, L, F, K, H, E, D"
     )
-
 
 
 if __name__ == '__main__':
