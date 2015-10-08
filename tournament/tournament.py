@@ -206,7 +206,7 @@ def swissPairings():
                 if not havePlayersBeenPaired(player1[1], player2[1]):
                     players.remove(player2)
                     new_pair_found = True
-                    break;
+                    break
             if not new_pair_found:
                 player2 = players.pop()
         pairings.append((player1[1], player1[2], player2[1], player2[2]))
