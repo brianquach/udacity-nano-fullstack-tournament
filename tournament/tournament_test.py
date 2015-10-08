@@ -200,7 +200,7 @@ def testBye():
             " return True"
         )
     print ("12. After pairings, since only one player, doesPlayerHaveBye() "
-           "returns True")
+           "returns True.")
 
 
 def testPlayerStandingsWithOpponentMatchWins():
@@ -298,9 +298,35 @@ def testPlayerStandingsWithOpponentMatchWins():
         raise ValueError("Player I should be fifteenth with OMW of 27")
     print (
         "13. After a full swiss-tournament players are ranked from first to "
-        "last as follows: I, G, N, M, J, O, C, A, B, L, F, K, H, E, D"
+        "last as follows: I, G, N, M, J, O, C, A, B, L, F, K, H, E, D."
     )
 
+
+def testPreventRematch():
+    deleteMatches()
+    deletePlayers()
+    deleteTournaments()
+    id1 = registerPlayer("Jim Raynor")
+    id2 = registerPlayer("Mengus Minsk")
+    id3 = registerPlayer("Arnold Shortman")
+    id4 = registerPlayer("Frank Sanatra")
+
+    reportMatch(id1, id2)
+    reportMatch(id2, id1)
+    reportMatch(id3, id4)
+    reportMatch(id4, id3)
+    reportMatch(id1, id2)
+    reportMatch(id2, id4)
+
+    swissPairings()
+    if not havePlayersBeenPaired(id1, id2):
+        raise ValueError(
+            "Players Jim Raynor and player Mengus Minsk have already been "
+            "paired; havePlayersBeenPaired() should return True"
+        )
+
+    print ("14. Rematch prevented until a player has played against everyone "
+           "else.")
 
 if __name__ == '__main__':
     testDeleteMatches()
@@ -316,4 +342,5 @@ if __name__ == '__main__':
     testReportMatchTie()
     testBye()
     testPlayerStandingsWithOpponentMatchWins()
+    testPreventRematch()
     print "Success!  All tests pass!"
