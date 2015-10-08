@@ -53,19 +53,19 @@ CREATE VIEW player_record AS (
         ) t ON p.id = t.playerId
 );
 CREATE VIEW player_opponents AS (
-    SELECT p.id, p.name, m.loserId opponentId, pr.name opponentName, (pr.wins*4) opponentMatchWinPoints, pr.ties opponentMatchTiePoints
+    SELECT p.tournamentId, p.id, p.name, m.loserId opponentId, pr.name opponentName, (pr.wins*4) opponentMatchWinPoints, pr.ties opponentMatchTiePoints
     FROM player p
         INNER JOIN match m ON p.id = m.winnerId
         INNER JOIN player_record pr ON m.loserId = pr.id
     WHERE m.loserId IS NOT NULL
     UNION
-    SELECT p.id, p.name, m.winnerId opponentId, pr.name opponentName, (pr.wins*4) opponentMatchWinPoints, pr.ties opponentMatchTiePoints
+    SELECT p.tournamentId, p.id, p.name, m.winnerId opponentId, pr.name opponentName, (pr.wins*4) opponentMatchWinPoints, pr.ties opponentMatchTiePoints
     FROM player p
         INNER JOIN match m ON p.id = m.loserId
         INNER JOIN player_record pr ON m.winnerId = pr.id
     WHERE m.winnerId IS NOT NULL
     UNION
-    SELECT p.id, p.name, mt2.playerId opponentId, pr.name opponentName, (pr.wins*4) opponentMatchWinPoints, pr.ties opponentMatchTiePoints
+    SELECT p.tournamentId, p.id, p.name, mt2.playerId opponentId, pr.name opponentName, (pr.wins*4) opponentMatchWinPoints, pr.ties opponentMatchTiePoints
     FROM player p 
         INNER JOIN match_tie mt ON p.id = mt.playerId 
         INNER JOIN match_tie mt2 ON mt.matchId = mt2.matchId AND mt.playerId != mt2.playerId

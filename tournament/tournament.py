@@ -165,14 +165,14 @@ def swissPairings():
         name2: the second player's name
     """
     pairings = []
-    players = playerStandings()
+    players = playerStandings(True)
     index = 0
     player_count = len(players)
     is_player_count_odd = (player_count % 2) != 0
     if player_count == 0:
         return []
 
-    matchCount = players[0][3]
+    matchCount = players[0][6]
     if matchCount == 0:
         random.shuffle(players)
 
@@ -184,24 +184,33 @@ def swissPairings():
         player_with_bye = None
         for player in players:
             if not doesPlayerHaveBye(player[0]):
-                reportMatch(player[0], None, False)
+                reportMatch(player[1], None, False)
                 player_with_bye = player
-                player_count -= 1
                 break
         players.remove(player_with_bye)
 
-    while index < player_count:
-        player_one = players[index]
-        index += 1
-        if (index < player_count):
-            player_two = players[index]
-            pairings.append((
-                player_one[0],
-                player_one[1],
-                player_two[0],
-                player_two[1]
-            ))
-        index += 1
+    while len(players) > 0:
+        player1 = players.pop()
+        player2 = players.pop()
+
+        # If two players have already played against each other, look down the
+        # list of players [higher ranked] until two players are found who have
+        # not yet played against each other. Only if a player has played
+        # against everyone down the list will a rematch be allowed.
+
+        if havePlayersBeenPaired(player1[1], player2[1]):
+            new_pair_found = False
+            players.append(player2)
+            for i in range((len(players) - 2), -1, -1):
+                player2 = players[i]
+                if not havePlayersBeenPaired(player1[1], player2[1]):
+                    players.remove(player2)
+                    new_pair_found = True
+                    break;
+            if not new_pair_found:
+                player2 = players.pop()
+        pairings.append((player1[1], player1[2], player2[1], player2[2]))
+
     return pairings
 
 
@@ -242,7 +251,7 @@ def activeTournamentId():
 
 
 def doesPlayerHaveBye(player):
-    """Returns the number of byes a player has in the current tournament.
+    """Determine if a player has a bye in the current tournament.
 
     Args:
       player: id of player to check for bye.
@@ -257,6 +266,29 @@ def doesPlayerHaveBye(player):
     c.execute(
         "SELECT * FROM player_bye WHERE tournamentId = %s AND winnerId = %s",
         (tournament_id, player)
+    )
+    row = c.fetchone()
+    conn.close()
+    return row is not None
+
+
+def havePlayersBeenPaired(player1, player2):
+    """Determine if two players have matched against each other already.
+
+    Args:
+      player1: id of a player to check
+      player2: id of a player to check
+
+    Returns:
+      A boolean; True if player1 has already played player2 and vice versa,
+      otherwise False.
+    """
+    conn = connect()
+    c = conn.cursor()
+    tournament_id = activeTournamentId()
+    c.execute(
+        "SELECT * FROM player_opponents WHERE tournamentId = %s AND id = %s "
+        "AND opponentId = %s", (tournament_id, player1, player2)
     )
     row = c.fetchone()
     conn.close()
