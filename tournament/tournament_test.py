@@ -328,6 +328,153 @@ def testPreventRematch():
     print ("14. Rematch prevented until a player has played against everyone "
            "else.")
 
+def testMultipleTournaments():
+    deleteMatches()
+    deletePlayers()
+    deleteTournaments()
+    createTournament()
+    id1 = registerPlayer("Michael Scott")
+    id2 = registerPlayer("Ricky Gervais")
+    id3 = registerPlayer("Stephen Colbert")
+    id4 = registerPlayer("Jon Stewart")
+    id5 = registerPlayer("Louie CK")
+    id6 = registerPlayer("Stephen King")
+    id7 = registerPlayer("Mac Donald")
+
+    [
+        (pid1, pname1, pid2, pname2),
+        (pid3, pname3, pid4, pname4),
+        (pid5, pname5, pid6, pname6)
+    ] = swissPairings()
+    reportMatch(pid1, pid2)
+    reportMatch(pid3, pid4)
+    reportMatch(pid5, pid6)
+
+    [
+        (pid1, pname1, pid2, pname2),
+        (pid3, pname3, pid4, pname4),
+        (pid5, pname5, pid6, pname6)
+    ] = swissPairings()
+    reportMatch(pid1, pid2)
+    reportMatch(pid3, pid4)
+    reportMatch(pid5, pid6)
+
+    [
+        (pid1, pname1, pid2, pname2),
+        (pid3, pname3, pid4, pname4),
+        (pid5, pname5, pid6, pname6)
+    ] = swissPairings()
+    reportMatch(pid1, pid2)
+    reportMatch(pid3, pid4)
+    reportMatch(pid5, pid6)
+
+    standings = playerStandings(True)
+    for (tId, i, n, w, l, t, m, omw) in standings:
+        if m != 3:
+            raise ValueError("Each player should have 3 matches.")
+        if w > 3:
+            raise ValueError(
+                "Each player cannot have more than 3 wins recorded."
+            )
+        if l > 3:
+            raise ValueError(
+                "Each player cannot have more than 3 losses recorded."
+            )
+        if t > 3:
+            raise ValueError(
+                "Each player cannot have more than 3 ties recorded."
+            )
+
+    createTournament()
+    id1 = registerPlayer("Michael Scott")
+    id2 = registerPlayer("Ricky Gervais")
+    id3 = registerPlayer("Stephen Colbert")
+    id4 = registerPlayer("Jon Stewart")
+    id5 = registerPlayer("Louie CK")
+    id6 = registerPlayer("Stephen King")
+    id7 = registerPlayer("Mac Donald")
+
+    [
+        (pid1, pname1, pid2, pname2),
+        (pid3, pname3, pid4, pname4),
+        (pid5, pname5, pid6, pname6)
+    ] = swissPairings()
+    reportMatch(pid1, pid2)
+    reportMatch(pid3, pid4)
+    reportMatch(pid5, pid6)
+
+    [
+        (pid1, pname1, pid2, pname2),
+        (pid3, pname3, pid4, pname4),
+        (pid5, pname5, pid6, pname6)
+    ] = swissPairings()
+    reportMatch(pid1, pid2)
+    reportMatch(pid3, pid4)
+    reportMatch(pid5, pid6)
+
+    [
+        (pid1, pname1, pid2, pname2),
+        (pid3, pname3, pid4, pname4),
+        (pid5, pname5, pid6, pname6)
+    ] = swissPairings()
+    reportMatch(pid1, pid2)
+    reportMatch(pid3, pid4)
+    reportMatch(pid5, pid6)
+
+    standings = playerStandings(True)
+    for (tId, i, n, w, l, t, m, omw) in standings:
+        if m != 3:
+            raise ValueError("Each player should have 3 matches.")
+        if w > 3:
+            raise ValueError(
+                "Each player cannot have more than 3 wins recorded."
+            )
+        if l > 3:
+            raise ValueError(
+                "Each player cannot have more than 3 losses recorded."
+            )
+        if t > 3:
+            raise ValueError(
+                "Each player cannot have more than 3 ties recorded."
+            )
+
+    createTournament()
+    id1 = registerPlayer("A")
+    id2 = registerPlayer("B")
+    id3 = registerPlayer("C")
+    id4 = registerPlayer("D")
+
+    [
+        (pid1, pname1, pid2, pname2),
+        (pid3, pname3, pid4, pname4)
+    ] = swissPairings()
+    reportMatch(pid1, pid2)
+    reportMatch(pid3, pid4)
+
+    [
+        (pid1, pname1, pid2, pname2),
+        (pid3, pname3, pid4, pname4)
+    ] = swissPairings()
+    reportMatch(pid1, pid2)
+    reportMatch(pid3, pid4, True)
+    for (tId, i, n, w, l, t, m, omw) in standings:
+        if m != 3:
+            raise ValueError("Each player should have 2 matches.")
+        if w > 3:
+            raise ValueError(
+                "Each player cannot have more than 2 wins recorded."
+            )
+        if l > 3:
+            raise ValueError(
+                "Each player cannot have more than 2 losses recorded."
+            )
+        if t > 3:
+            raise ValueError(
+                "Each player cannot have more than 2 ties recorded."
+            )
+    print ("15. After creating 3 different tournaments, player scores are kept "
+           "to tied to their respective tournaments.")
+
 if __name__ == '__main__':
     testDeleteMatches()
     testDelete()
@@ -343,4 +490,5 @@ if __name__ == '__main__':
     testBye()
     testPlayerStandingsWithOpponentMatchWins()
     testPreventRematch()
+    testMultipleTournaments()
     print "Success!  All tests pass!"
