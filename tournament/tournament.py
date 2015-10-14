@@ -4,6 +4,23 @@ Licensed under MIT (https://github.com/brianquach/udacity-nano-fullstack-tournam
 """
 import random
 import psycopg2
+from contextlib import contextmanager
+
+
+@contextmanager
+def get_cursor():
+    """Returns a context manager that will handle our database connection"""
+    conn = connect()
+    c = conn.cursor()
+    try:
+        yield c
+    except:
+        raise
+    else:
+        conn.commit()
+    finally:
+        c.close()
+        conn.close()
 
 
 def connect():
@@ -13,30 +30,22 @@ def connect():
 
 def deleteMatches():
     """Remove all the match records from the database."""
-    conn = connect()
-    c = conn.cursor()
-    c.execute("DELETE FROM match_tie")
-    c.execute("DELETE FROM match")
-    conn.commit()
-    conn.close()
+    with get_cursor() as c:
+        c.execute("DELETE FROM match_tie")
+        c.execute("DELETE FROM match")
 
 
 def deletePlayers():
     """Remove all the player records from the database."""
-    conn = connect()
-    c = conn.cursor()
-    c.execute("DELETE FROM player")
-    conn.commit()
-    conn.close()
+    with get_cursor() as c:
+        c.execute("DELETE FROM player")
 
 
 def countPlayers():
     """Returns the number of players currently registered."""
-    conn = connect()
-    c = conn.cursor()
-    c.execute("SELECT COUNT(id) FROM player")
-    row = c.fetchone()
-    conn.close()
+    with get_cursor() as c:
+        c.execute("SELECT COUNT(id) FROM player")
+        row = c.fetchone()
     return row[0] if row is not None else 0
 
 
@@ -52,14 +61,11 @@ def registerPlayer(name):
     Returns:
       Newly registered player's Id
     """
-    conn = connect()
-    c = conn.cursor()
     tournament_id = activeTournamentId()
-    c.execute("INSERT INTO player (name, tournamentId) VALUES (%s, %s) "
-              "RETURNING id", (name, tournament_id))
-    player_id = c.fetchone()[0]
-    conn.commit()
-    conn.close()
+    with get_cursor() as c:
+        c.execute("INSERT INTO player (name, tournamentId) VALUES (%s, %s) "
+                  "RETURNING id", (name, tournament_id))
+        player_id = c.fetchone()[0]
     return player_id
 
 
@@ -92,8 +98,6 @@ def playerStandings(show_all_columns=False):
         ties: the number of matches the player has tied
         omw: the total points added up from player's opponent's wins and ties
     """
-    conn = connect()
-    c = conn.cursor()
 
     # The reason why there are two queries below is that the
     # playerStandingBasic is used to pass the original Udacity tests for
@@ -101,12 +105,14 @@ def playerStandings(show_all_columns=False):
     # else.
 
     tournament_id = activeTournamentId()
-    query = "SELECT {0} FROM player_standing WHERE tournamentId = %s".format(
-        "*" if show_all_columns else "id, name, wins, matches"
-    )
-    c.execute(query, (tournament_id,))
-    player_standings = c.fetchall()
-    conn.close()
+    if show_all_columns:
+        query = "SELECT * FROM player_standing WHERE tournamentId = %s"
+    else:
+        query = """SELECT id, name, wins, matches FROM player_standing WHERE
+                tournamentId = %s"""
+    with get_cursor() as c:
+        c.execute(query, (tournament_id,))
+        player_standings = c.fetchall()
     return player_standings
 
 
@@ -121,25 +127,25 @@ def reportMatch(winner, loser, is_tie=False):
       loser: the id number of the player who lost
       is_tie: true if the match ended in a tie, otherwise false
     """
-    conn = connect()
-    c = conn.cursor()
     tournament_id = activeTournamentId()
-    if is_tie:
-        c.execute(
-            "INSERT INTO match (tournamentId, isTie) VALUES"
-            "(%s, %s) RETURNING id", (tournament_id, is_tie)
-        )
-        match_id = c.fetchone()[0]
-        c.execute("INSERT INTO match_tie (matchId, playerId) VALUES "
-                  "(%s, %s), (%s, %s)", (match_id, winner, match_id, loser))
-    else:
-        c.execute(
-            "INSERT INTO match (tournamentId, winnerId, loserId, isTie) VALUES"
-            "(%s, %s, %s, %s) RETURNING id", (tournament_id, winner, loser,
-                                              is_tie)
-        )
-    conn.commit()
-    conn.close()
+    with get_cursor() as c:
+        if is_tie:
+            c.execute(
+                "INSERT INTO match (tournamentId, isTie) VALUES"
+                "(%s, %s) RETURNING id", (tournament_id, is_tie)
+            )
+            match_id = c.fetchone()[0]
+            c.execute(
+                "INSERT INTO match_tie (matchId, playerId) VALUES "
+                "(%s, %s), (%s, %s)", (match_id, winner, match_id, loser)
+            )
+        else:
+            c.execute(
+                "INSERT INTO match (tournamentId, winnerId, loserId, isTie) "
+                "VALUES (%s, %s, %s, %s) RETURNING id", (
+                    tournament_id, winner, loser, is_tie
+                )
+            )
 
 
 def swissPairings():
@@ -216,22 +222,16 @@ def swissPairings():
 
 def createTournament():
     """Creates a new tournament and returns its id."""
-    conn = connect()
-    c = conn.cursor()
-    c.execute("INSERT INTO tournament (id) VALUES (DEFAULT) RETURNING id")
-    tournament_id = c.fetchone()[0]
-    conn.commit()
-    conn.close()
+    with get_cursor() as c:
+        c.execute("INSERT INTO tournament (id) VALUES (DEFAULT) RETURNING id")
+        tournament_id = c.fetchone()[0]
     return tournament_id
 
 
 def deleteTournaments():
     """Remove all tournament records from the database."""
-    conn = connect()
-    c = conn.cursor()
-    c. execute("DELETE FROM tournament")
-    conn.commit()
-    conn.close()
+    with get_cursor() as c:
+        c. execute("DELETE FROM tournament")
 
 
 def activeTournamentId():
@@ -241,12 +241,10 @@ def activeTournamentId():
     playing with no winner. If there are no tournaments then a new one will be
     created and its id returned.
     """
-    conn = connect()
-    c = conn.cursor()
-    c.execute("SELECT id FROM tournament ORDER BY id DESC LIMIT 1")
-    row = c.fetchone()
-    tournament_id = createTournament() if row is None else row[0]
-    conn.close()
+    with get_cursor() as c:
+        c.execute("SELECT id FROM tournament ORDER BY id DESC LIMIT 1")
+        row = c.fetchone()
+        tournament_id = createTournament() if row is None else row[0]
     return tournament_id
 
 
@@ -260,15 +258,13 @@ def doesPlayerHaveBye(player):
       A boolean; True if player has a bye in this active tournament, otherwise
       False.
     """
-    conn = connect()
-    c = conn.cursor()
     tournament_id = activeTournamentId()
-    c.execute(
-        "SELECT * FROM player_bye WHERE tournamentId = %s AND winnerId = %s",
-        (tournament_id, player)
-    )
-    row = c.fetchone()
-    conn.close()
+    with get_cursor() as c:
+        c.execute(
+            "SELECT * FROM player_bye WHERE tournamentId = %s AND "
+            "winnerId = %s", (tournament_id, player)
+        )
+        row = c.fetchone()
     return row is not None
 
 
@@ -283,13 +279,11 @@ def havePlayersBeenPaired(player1, player2):
       A boolean; True if player1 has already played player2 and vice versa,
       otherwise False.
     """
-    conn = connect()
-    c = conn.cursor()
     tournament_id = activeTournamentId()
-    c.execute(
-        "SELECT * FROM player_opponents WHERE tournamentId = %s AND id = %s "
-        "AND opponentId = %s", (tournament_id, player1, player2)
-    )
-    row = c.fetchone()
-    conn.close()
+    with get_cursor() as c:
+        c.execute(
+            "SELECT * FROM player_opponents WHERE tournamentId = %s AND "
+            "id = %s AND opponentId = %s", (tournament_id, player1, player2)
+        )
+        row = c.fetchone()
     return row is not None
