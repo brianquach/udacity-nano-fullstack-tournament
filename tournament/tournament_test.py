@@ -328,6 +328,7 @@ def testPreventRematch():
     print ("14. Rematch prevented until a player has played against everyone "
            "else.")
 
+
 def testMultipleTournaments():
     deleteMatches()
     deletePlayers()
@@ -472,8 +473,8 @@ def testMultipleTournaments():
             raise ValueError(
                 "Each player cannot have more than 2 ties recorded."
             )
-    print ("15. After creating 3 different tournaments, player scores are kept "
-           "to tied to their respective tournaments.")
+    print ("15. After creating 3 different tournaments, player scores are kept"
+           " to tied to their respective tournaments.")
 
 if __name__ == '__main__':
     testDeleteMatches()
