@@ -99,10 +99,9 @@ def playerStandings(show_all_columns=False):
         omw: the total points added up from player's opponent's wins and ties
     """
 
-    # The reason why there are two queries below is that the
-    # playerStandingBasic is used to pass the original Udacity tests for
-    # backward compatibily. And playerStandingExpanded is used for everything
-    # else.
+    # The reason why there are two queries below is that one is used to pass
+    # the original Udacity tests, therefore keeping backward compatibily. And
+    # other is used for everything else.
 
     tournament_id = activeTournamentId()
     if show_all_columns:
