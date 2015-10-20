@@ -31,14 +31,13 @@ def connect():
 def deleteMatches():
     """Remove all the match records from the database."""
     with get_cursor() as c:
-        c.execute("DELETE FROM match_tie")
-        c.execute("DELETE FROM match")
+        c.execute("TRUNCATE match RESTART IDENTITY CASCADE")
 
 
 def deletePlayers():
     """Remove all the player records from the database."""
     with get_cursor() as c:
-        c.execute("DELETE FROM player")
+        c.execute("TRUNCATE player RESTART IDENTITY CASCADE")
 
 
 def countPlayers():
@@ -230,7 +229,7 @@ def createTournament():
 def deleteTournaments():
     """Remove all tournament records from the database."""
     with get_cursor() as c:
-        c. execute("DELETE FROM tournament")
+        c. execute("TRUNCATE tournament RESTART IDENTITY CASCADE")
 
 
 def activeTournamentId():
