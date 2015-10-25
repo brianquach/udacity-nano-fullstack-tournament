@@ -187,11 +187,12 @@ def swissPairings():
     if is_player_count_odd:
         player_with_bye = None
         for player in players:
-            if not doesPlayerHaveBye(player[0]):
+            if not doesPlayerHaveBye(player[1]):
                 reportMatch(player[1], None, False)
                 player_with_bye = player
                 break
-        players.remove(player_with_bye)
+        if player_with_bye is not None:
+            players.remove(player_with_bye)
 
     while len(players) > 0:
         player1 = players.pop()
